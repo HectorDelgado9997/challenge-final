@@ -21,6 +21,7 @@ env/
 # MLflow
 mlruns/
 mlartifacts/
+mlflow.db
 
 # Data outputs
 data/raw/monthly_prices.csv
