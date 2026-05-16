@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment variables
+.env
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# Data outputs
+data/raw/monthly_prices.csv
+data/processed/model_dataset.csv
+data/outputs/recommended_allocation.csv
+reports/figures/
+reports/metrics/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/

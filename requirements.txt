@@ -1,0 +1,12 @@
+pandas
+numpy
+scikit-learn
+yfinance
+PyPortfolioOpt
+mlflow
+matplotlib
+seaborn
+joblib
+pydantic
+python-dotenv
+pytest
