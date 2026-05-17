@@ -1,4 +1,4 @@
-# 📈 Monthly Investment Recommendation — Challenge Final
+#  Monthly Investment Recommendation — Challenge Final
 
 [![Status](https://img.shields.io/badge/Status-Completado-brightgreen)](https://github.com/HectorDelgado9997/challenge-final)
 [![Python](https://img.shields.io/badge/Python-3.9+-blue)](https://www.python.org/)
@@ -7,7 +7,7 @@
 [![PyPortfolioOpt](https://img.shields.io/badge/PyPortfolioOpt-Optimization-green)](https://pyportfolioopt.readthedocs.io/)
 [![License](https://img.shields.io/badge/License-MIT-lightgrey)](LICENSE)
 [![CI](https://github.com/HectorDelgado9997/challenge-final/actions/workflows/ci.yml/badge.svg)](https://github.com/HectorDelgado9997/challenge-final/actions/workflows/ci.yml)
-## 📌 Descripcion
+##  Descripcion
 
 Sistema local de recomendacion de inversion mensual que descarga datos
 historicos de **Yahoo Finance**, entrena modelos de Machine Learning para
@@ -19,7 +19,7 @@ activos financieros usando **Teoria Moderna de Portafolios**.
 
 ---
 
-## 🎯 Objetivo
+##  Objetivo
 
 Recomendar como distribuir un monto mensual de inversion entre un universo
 de activos financieros, combinando:
@@ -31,7 +31,7 @@ de activos financieros, combinando:
 
 ---
 
-## 🗂️ Universo de Activos
+##  Universo de Activos
 
 | Asset     | Tipo                         |
 |-----------|------------------------------|
@@ -47,7 +47,7 @@ de activos financieros, combinando:
 
 ---
 
-## 📁 Estructura del Repositorio
+##  Estructura del Repositorio
 
 ```text
 challenge-final/
@@ -87,7 +87,7 @@ challenge-final/
 
 ---
 
-## 🤖 Modelos
+##  Modelos
 
 ### Clasificacion — ¿Supera al benchmark SPY?
 
@@ -117,7 +117,7 @@ challenge-final/
 
 ---
 
-## 📊 Features Utilizadas (12)
+##  Features Utilizadas (12)
 
 `return_1m` · `return_3m` · `return_6m` · `return_12m` ·
 `volatility_3m` · `volatility_6m` · `drawdown_3m` · `drawdown_6m` ·
@@ -125,7 +125,7 @@ challenge-final/
 
 ---
 
-## 🏦 Optimizacion de Portafolio
+##  Optimizacion de Portafolio
 
 La optimizacion usa **PyPortfolioOpt** con los retornos esperados predichos
 por Linear Regression y la matriz de covarianza historica mensual:
@@ -140,7 +140,7 @@ por Linear Regression y la matriz de covarianza historica mensual:
 
 ---
 
-## ⚙️ Instalacion y Ejecucion Rapida
+##  Instalacion y Ejecucion Rapida
 
 ```bash
 # 1. Clonar el repositorio
@@ -166,7 +166,7 @@ python scripts/05_run_full_pipeline.py --amount 10000
 
 ---
 
-## 🔁 Pipeline Completo
+##  Pipeline Completo
 Validacion de argumentos
 │
 ▼
@@ -187,7 +187,7 @@ data/outputs/recommended_allocation.csv
 
 ---
 
-## 📤 Outputs Generados
+##  Outputs Generados
 
 ```text
 data/raw/monthly_prices.csv
@@ -202,7 +202,7 @@ reports/metrics/model_metrics.json
 
 ---
 
-## 🧪 Tests
+##  Tests
 
 ```bash
 pytest -v
@@ -210,7 +210,7 @@ pytest -v
 
 ---
 
-## 📚 Documentacion
+##  Documentacion
 
 | Archivo                      | Contenido                                    |
 |------------------------------|----------------------------------------------|
@@ -222,7 +222,7 @@ pytest -v
 
 ---
 
-## 🛠️ Stack Tecnologico
+##  Stack Tecnologico
 
 | Herramienta      | Uso                              |
 |------------------|----------------------------------|
@@ -241,7 +241,7 @@ pytest -v
 
 ---
 
-## 👤 Autor
+##  Autor
 
-**Hector Delgado**
+**Héctor Manuel Delgado Zambrano**
 [![GitHub](https://img.shields.io/badge/GitHub-HectorDelgado9997-black)](https://github.com/HectorDelgado9997)
