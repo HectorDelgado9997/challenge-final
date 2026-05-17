@@ -1,8 +1,8 @@
 pandas==2.3.3
 numpy==2.3.5
 scikit-learn==1.8.0
-yfinance==0.2.51
-PyPortfolioOpt==0.5.5
+yfinance==1.3.0
+PyPortfolioOpt==1.6.0
 mlflow==3.12.0
 matplotlib==3.10.7
 seaborn==0.13.2
