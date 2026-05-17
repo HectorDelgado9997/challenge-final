@@ -1,136 +1,130 @@
 # Dataset Extraction
 
-## Objective
+## Overview
 
-The objective of the dataset extraction stage is to build a reproducible financial dataset using historical price data downloaded from `yfinance`.
+This project does not use a static dataset file. Instead, historical financial
+data is downloaded dynamically from **Yahoo Finance** using the `yfinance` library.
+The asset universe, extraction parameters, and output paths are all defined in
+`src/config/settings.py`.
 
-The output of this stage is a monthly price dataset that will later be transformed into a machine learning dataset.
+## Asset Universe
 
-## Data Source
+| Asset     | Type                        |
+|-----------|-----------------------------|
+| SPY       | US Large Cap Equity ETF     |
+| QQQ       | US Technology Equity ETF    |
+| BTC-USD   | Bitcoin / Cryptocurrency    |
+| XLE       | US Energy Sector ETF        |
+| GRID      | Clean Energy ETF            |
+| FLKR      | Frontier Markets ETF        |
+| GLD       | Gold ETF                    |
+| EWW       | Mexico Equity ETF           |
+| EWZ       | Brazil Equity ETF           |
 
-The main data source is:
+Asset metadata is stored in:
 
 ```text
-yfinance
-
-The project downloads historical daily adjusted close prices and converts them into monthly prices using the last available trading price of each month.
-
-Asset Universe
-
-The asset universe is defined in:
-
 data/raw/asset_details.csv
+```
 
-The file contains two columns:
+Expected columns:
 
-asset
-domain
+| Column   | Description               |
+|----------|---------------------------|
+| `asset`  | Yahoo Finance ticker      |
+| `domain` | Asset category or sector  |
 
-Example:
+## Extraction Configuration
 
-asset,domain
-SPY,US Equity ETF
-QQQ,US Equity ETF
-BTC-USD,Crypto
-XLE,Sector ETF
-GRID,Thematic ETF
-FLKR,International ETF
-GLD,Commodity ETF
-EWW,Mexico ETF
-EWZ,Brazil ETF
-Design Decision
+| Parameter              | Value                        |
+|------------------------|------------------------------|
+| Default start date     | `2015-01-01`                 |
+| Default end date       | Latest available (None)      |
+| yfinance interval      | `1d` (daily, resampled monthly) |
+| Price column           | `adjusted_close`             |
 
-The original project requirement refers to an input containing an attribute and a domain. In this implementation:
+## Extraction Process
 
-asset  = financial ticker
-domain = financial asset category
+Data extraction is handled by `src/data/extract_data.py` and triggered via:
 
-This design keeps the project aligned with the requirement while making the financial dataset explicit and easy to validate.
-
-Extraction Process
-
-The extraction process is implemented in:
-
-src/data/extract_data.py
-
-The executable script is:
-
-scripts/01_extract_data.py
-
-The process follows these steps:
-
-1. Load data/raw/asset_details.csv
-2. Validate asset and domain columns
-3. Extract the list of tickers
-4. Download daily adjusted close prices from yfinance
-5. Convert daily prices to monthly prices
-6. Save the monthly price dataset
-Output File
-
-The output file is:
-
-data/raw/monthly_prices.csv
-
-It contains:
-
-date
-asset
-adjusted_close
-Monthly Price Construction
-
-Monthly prices are calculated using the last available adjusted close price for each month.
-
-This avoids creating artificial prices and reflects the most recent available monthly valuation for each asset.
-
-Data Validation
-
-Validation is implemented in:
-
-src/data/validate_data.py
-
-The validation process checks:
-
-File existence
-Required columns
-Empty datasets
-Null assets
-Duplicated assets
-Invalid date ranges
-Invalid asset lists
-Default Configuration
-
-The default extraction start date is defined in:
-
-src/config/settings.py
-
-Default value:
-
-2015-01-01
-
-The default end date is:
-
-None
-
-This allows yfinance to download data up to the latest available date.
-
-How to Run
-
-From the project root:
-
+```bash
 python scripts/01_extract_data.py
-Expected Result
+```
 
-The script should generate:
+Or through the full pipeline:
 
+```bash
+python scripts/05_run_full_pipeline.py --amount 10000 --start-date 2015-01-01
+```
+
+The extraction flow:yfinance API
+│
+▼
+Download daily adjusted close prices for all assets
+│
+▼
+Resample to monthly frequency (last trading day of month)
+│
+▼
 data/raw/monthly_prices.csv
 
-To validate the result:
+## Output File
 
-python -c "import pandas as pd; df = pd.read_csv('data/raw/monthly_prices.csv'); print(df.head()); print(df.shape)"
+```text
+data/raw/monthly_prices.csv
+```
 
-SPY is used as the benchmark asset.
-BTC is represented as BTC-USD because this is the valid yfinance ticker.
-Only historical price data is used.
-No external macroeconomic variables are included.
-The project is designed for local execution.
+This file contains monthly adjusted close prices with assets as columns
+and dates as the index.
 
+## Dataset Building
+
+After extraction, the modeling dataset is built by `src/data/build_dataset.py`:
+
+```bash
+python scripts/02_build_dataset.py
+```
+
+This step computes all financial features from the raw monthly prices
+and stores the result in:
+
+```text
+data/processed/model_dataset.csv
+```
+
+## Model Dataset Structure
+
+| Column                       | Type    | Description                                       |
+|------------------------------|---------|---------------------------------------------------|
+| `date`                       | date    | Month-end date                                    |
+| `asset`                      | str     | Asset ticker                                      |
+| `return_1m`                  | float   | 1-month return                                    |
+| `return_3m`                  | float   | 3-month return                                    |
+| `return_6m`                  | float   | 6-month return                                    |
+| `return_12m`                 | float   | 12-month return                                   |
+| `volatility_3m`              | float   | Rolling 3-month volatility                        |
+| `volatility_6m`              | float   | Rolling 6-month volatility                        |
+| `drawdown_3m`                | float   | Rolling 3-month max drawdown                      |
+| `drawdown_6m`                | float   | Rolling 6-month max drawdown                      |
+| `sharpe_3m`                  | float   | Rolling 3-month Sharpe ratio                      |
+| `sharpe_6m`                  | float   | Rolling 6-month Sharpe ratio                      |
+| `relative_strength_3m`       | float   | Return relative to SPY over 3 months              |
+| `relative_strength_6m`       | float   | Return relative to SPY over 6 months              |
+| `target_outperform_next_month` | int  | 1 if asset outperforms SPY next month, else 0     |
+
+## Benchmark Asset
+
+The classification target is defined relative to the benchmark:
+
+```python
+BENCHMARK_ASSET = "SPY"
+```
+
+An asset is labeled `1` (outperform) if its next-month return exceeds SPY's
+next-month return, and `0` otherwise.
+
+## Regression Target
+
+The regression target `y_regression` is defined as the next month's `return_1m`
+for each asset. This target is **computed in memory** during training and is
+**not persisted** in `model_dataset.csv`.

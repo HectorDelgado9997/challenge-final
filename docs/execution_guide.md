@@ -1,130 +1,224 @@
-# Execution Guide
+# Technical Execution Guide
 
-## Objective
+## Prerequisites
 
-This guide explains how to clone, configure, run, and validate the Monthly Investment Recommendation project locally.
+| Tool       | Version recommended |
+|------------|---------------------|
+| Python     | 3.9+                |
+| Git        | Any recent version  |
+| Git Bash   | Windows users       |
 
-The project is designed to run in VS Code using a local Python virtual environment.
+---
 
 ## 1. Clone the Repository
 
 ```bash
 git clone git@github.com:HectorDelgado9997/challenge-final.git
 cd challenge-final
+```
 
-If using HTTPS:
+---
 
-git clone https://github.com/HectorDelgado9997/challenge-final.git
-cd challenge-final
-2. Open the Project in VS Code
-code .
-3. Create a Virtual Environment
+## 2. Create and Activate Virtual Environment
+
+```bash
+# Create the environment
 python -m venv .venv
-4. Activate the Virtual Environment
 
-Using Git Bash on Windows:
-
+# Activate — Windows Git Bash
 source .venv/Scripts/activate
 
-Using PowerShell on Windows:
+# Activate — Linux / Mac
+source .venv/bin/activate
+```
 
-.venv\Scripts\Activate.ps1
-5. Install Dependencies
+> You should see `(.venv)` at the start of your terminal prompt.
+
+---
+
+## 3. Install Dependencies
+
+```bash
 pip install -r requirements.txt
-6. Validate Project Structure
+```
 
-The repository should contain:
+| Package          | Purpose                              |
+|------------------|--------------------------------------|
+| pandas           | Data manipulation                    |
+| numpy            | Numerical operations                 |
+| scikit-learn     | Model training and evaluation        |
+| yfinance         | Financial data extraction            |
+| PyPortfolioOpt   | Portfolio optimization               |
+| mlflow           | Experiment tracking                  |
+| matplotlib       | Plots and visualizations             |
+| seaborn          | Statistical visualizations           |
+| joblib           | Model serialization                  |
+| pydantic         | Data validation                      |
+| python-dotenv    | Environment variable loading         |
+| pytest           | Unit testing                         |
 
-data/
-docs/
-notebooks/
-reports/
-scripts/
-src/
-tests/
-README.md
-requirements.txt
-pyproject.toml
-7. Run Data Extraction
+---
+
+## 4. Prepare the Asset Details File
+
+Make sure the asset universe file exists at:
+
+```text
+data/raw/asset_details.csv
+```
+
+Expected format:
+
+```csv
+asset,domain
+SPY,US Equity
+QQQ,US Technology
+BTC-USD,Cryptocurrency
+XLE,US Energy
+GRID,Clean Energy
+FLKR,Frontier Markets
+GLD,Commodities
+EWW,Mexico Equity
+EWZ,Brazil Equity
+```
+
+---
+
+## 5. Start the MLflow Server
+
+Open a **first terminal** and run:
+
+```bash
+mlflow ui --host 127.0.0.1 --port 5000
+```
+
+> Keep this terminal open during the entire pipeline execution.
+> Open `http://127.0.0.1:5000` to monitor experiments in real time.
+
+---
+
+## 6. Run the Full Pipeline
+
+Open a **second terminal**, activate the virtual environment and run:
+
+```bash
+python scripts/05_run_full_pipeline.py --amount 10000
+```
+
+With a custom start date:
+
+```bash
+python scripts/05_run_full_pipeline.py --amount 10000 --start-date 2015-01-01
+```
+
+### What the full pipeline executes
+Validate arguments (amount, date range)
+│
+▼
+run_data_extraction()       → data/raw/monthly_prices.csv
+│
+▼
+run_dataset_building()      → data/processed/model_dataset.csv
+│
+▼
+train_and_evaluate_classifier()   [Logistic Regression]
+train_and_evaluate_classifier()   [Random Forest]
+train_and_evaluate_regression_model()  [Linear Regression]
+│
+▼
+log_model_run() × 3         → MLflow experiment runs
+save_metrics_to_json()      → reports/metrics/model_metrics.json
+│
+▼
+run_portfolio_optimization() → data/outputs/recommended_allocation.csv
+
+---
+
+## 7. Run Scripts Individually
+
+Each stage can also be executed independently:
+
+```bash
+# Step 1 — Extract financial data from yfinance
 python scripts/01_extract_data.py
 
-Expected output:
-
-data/raw/monthly_prices.csv
-
-Validate:
-
-python -c "import pandas as pd; df = pd.read_csv('data/raw/monthly_prices.csv'); print(df.head()); print(df.shape)"
-8. Build the Model Dataset
+# Step 2 — Build model dataset with features and target
 python scripts/02_build_dataset.py
 
-Expected output:
-
-data/processed/model_dataset.csv
-
-Validate:
-
-python -c "import pandas as pd; df = pd.read_csv('data/processed/model_dataset.csv'); print(df.head()); print(df.shape); print(df.columns.tolist())"
-9. Start MLflow
-
-Open a terminal and run:
-
-mlflow ui --host 127.0.0.1 --port 5000
-
-Keep this terminal open.
-
-Open in the browser:
-
-http://127.0.0.1:5000
-10. Train Models
-
-In a second terminal, activate the virtual environment:
-
-source .venv/Scripts/activate
-
-Run:
-
+# Step 3 — Train and evaluate all models
 python scripts/03_train_models.py
 
-Expected outputs:
-
-reports/metrics/model_metrics.json
-reports/figures/confusion_matrix_logistic_regression.png
-reports/figures/confusion_matrix_random_forest.png
-reports/figures/roc_curve_logistic_regression.png
-reports/figures/roc_curve_random_forest.png
-MLflow runs
-
-Validate:
-
-cat reports/metrics/model_metrics.json
-11. Optimize Portfolio
+# Step 4 — Run portfolio optimization
 python scripts/04_optimize_portfolio.py --amount 10000
+```
 
-Expected output:
+---
 
-data/outputs/recommended_allocation.csv
+## 8. Check the Outputs
 
-Validate:
+After a successful run the following files are generated:
 
-python -c "import pandas as pd; df = pd.read_csv('data/outputs/recommended_allocation.csv'); print(df)"
-12. Run the Full Pipeline
+```text
+data/
+├── raw/
+│   └── monthly_prices.csv              ← Raw monthly prices from yfinance
+├── processed/
+│   └── model_dataset.csv               ← Feature-engineered dataset
+└── outputs/
+    └── recommended_allocation.csv      ← Final portfolio allocation
 
-Start MLflow first:
+reports/
+├── figures/
+│   ├── confusion_matrix_logistic_regression.png
+│   ├── confusion_matrix_random_forest.png
+│   ├── roc_curve_logistic_regression.png
+│   └── roc_curve_random_forest.png
+└── metrics/
+    └── model_metrics.json              ← All model metrics consolidated
+```
 
-mlflow ui --host 127.0.0.1 --port 5000
+---
 
-In another terminal:
+## 9. Recommended Allocation Output
 
-python scripts/05_run_full_pipeline.py --amount 10000
+The final output `recommended_allocation.csv` contains one row per
+allocated asset:
 
-Optional:
+| Column             | Description                              |
+|--------------------|------------------------------------------|
+| `asset`            | Asset ticker                             |
+| `weight`           | Portfolio weight (0.0 to 0.35)           |
+| `expected_return`  | Predicted next-month return              |
+| `allocated_amount` | Capital allocated (weight × amount)      |
 
-python scripts/05_run_full_pipeline.py --amount 10000 --start-date 2015-01-01
-13. Expected Final Outputs
-data/raw/monthly_prices.csv
-data/processed/model_dataset.csv
-data/outputs/recommended_allocation.csv
-reports/metrics/model_metrics.json
-reports/figures/*.png
-MLflow experiment runs
+Example for `--amount 10000`:
+
+```csv
+asset,weight,expected_return,allocated_amount
+SPY,0.35,0.021,3500.0
+GLD,0.30,0.018,3000.0
+QQQ,0.20,0.015,2000.0
+EWW,0.15,0.012,1500.0
+```
+
+---
+
+## 10. Run the Tests
+
+```bash
+pytest -v
+```
+
+---
+
+## Common Errors
+
+| Error                              | Likely cause                          | Fix                                    |
+|------------------------------------|---------------------------------------|----------------------------------------|
+| `ModuleNotFoundError`              | Virtual env not activated             | Run `source .venv/Scripts/activate`    |
+| `FileNotFoundError` on CSV        | asset_details.csv missing             | Add the file to `data/raw/`            |
+| `DataExtractionError`             | No internet / yfinance rate limit     | Wait and retry                         |
+| `PortfolioOptimizationError`      | max_sharpe failed                     | Fallback to min_volatility (automatic) |
+| `mlflow.exceptions`               | MLflow server not running             | Run `mlflow ui --host 127.0.0.1 --port 5000` first |
+| Port 5000 in use                  | Another process on port 5000          | Run `mlflow ui --port 5001`            |
+| `Not enough unique dates`         | Dataset too short for time split      | Use `--start-date 2015-01-01`          |
