@@ -6,7 +6,7 @@
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-ML-blue)](https://scikit-learn.org/)
 [![PyPortfolioOpt](https://img.shields.io/badge/PyPortfolioOpt-Optimization-green)](https://pyportfolioopt.readthedocs.io/)
 [![License](https://img.shields.io/badge/License-MIT-lightgrey)](LICENSE)
-
+[![CI](https://github.com/HectorDelgado9997/challenge-final/actions/workflows/ci.yml/badge.svg)](https://github.com/HectorDelgado9997/challenge-final/actions/workflows/ci.yml)
 ## 📌 Descripcion
 
 Sistema local de recomendacion de inversion mensual que descarga datos
